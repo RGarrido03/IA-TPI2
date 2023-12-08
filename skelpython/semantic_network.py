@@ -67,13 +67,13 @@ class SemanticNetwork:
             self.declarations[decl.user] = {}
 
         # ensure upper/lower case conventions are followed
-        assert not isinstance(decl.relation, Member) or isObjectName(
+        assert not isinstance(decl.relation, Member) or is_object_name(
             decl.relation.entity1
         )
-        assert not isinstance(decl.relation, Subtype) or isTypeName(
+        assert not isinstance(decl.relation, Subtype) or is_type_name(
             decl.relation.entity1
         )
-        assert not isinstance(decl.relation, (Member, Subtype)) or isTypeName(
+        assert not isinstance(decl.relation, (Member, Subtype)) or is_type_name(
             decl.relation.entity2
         )
 
@@ -93,9 +93,9 @@ class SemanticNetwork:
 
 
 # for convenience
-def isObjectName(name):
+def is_object_name(name):
     return name[0].isupper()
 
 
-def isTypeName(name):
+def is_type_name(name):
     return name[0].islower()
