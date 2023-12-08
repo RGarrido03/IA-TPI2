@@ -17,7 +17,7 @@ class MySN(SemanticNetwork):
         SemanticNetwork.__init__(self)
         self.query_result = []
 
-    def query_local(self, user=None, e1=None, rel=None, e2=None):
+    def query_local(self, user=None, e1=None, rel=None, e2=None) -> list[Declaration]:
         def get_decl(
             user_iter: str, e1_iter: str, rel_iter: str, e2_iter: Union[str, set]
         ) -> list[Declaration]:
@@ -50,11 +50,21 @@ class MySN(SemanticNetwork):
         ]
         return self.query_result
 
-    def query(self, entity, assoc=None):
-        # IMPLEMENT HERE
-        pass
-        return self.query_result  # Your code must leave the output in
-        # self.query_result, which is returned here
+    def query(self, entity, rel=None) -> list:
+        decl_local = self.query_local(e1=entity, rel=rel) + self.query_local(
+            e2=entity, rel=rel
+        )
+
+        pred_direct = self.query_local(e1=entity, rel="member") + self.query_local(
+            e1=entity, rel="subtype"
+        )
+
+        decl = decl_local
+        for dp in pred_direct:
+            decl += self.query(dp.relation.entity2, rel)
+
+        self.query_result = decl
+        return self.query_result
 
     def update_assoc_stats(self, assoc, user=None):
         # IMPLEMENT HERE
