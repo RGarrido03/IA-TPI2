@@ -1,7 +1,7 @@
 # encoding: utf8
 
-# YOUR NAME:
-# YOUR NUMBER:
+# YOUR NAME: Rúben Tavares Garrido
+# YOUR NUMBER: 107927
 
 # COLLEAGUES WITH WHOM YOU DISCUSSED THIS ASSIGNMENT (names, numbers):
 # - ...
