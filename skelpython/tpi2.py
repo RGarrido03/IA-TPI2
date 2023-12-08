@@ -73,9 +73,8 @@ class MySN(SemanticNetwork):
         return self.query_result
 
     def update_assoc_stats(self, assoc: str, user: str = None) -> None:
-        # TODO: Check if user is None
-        # TODO: Get probability
         assoc_decl = self.query_local(user=user, rel=assoc)
+        n = len(assoc_decl)
 
         def predecessor_path(c: str) -> list:
             decl = self.query_local(user=user, e1=c, rel="subtype")
@@ -99,8 +98,23 @@ class MySN(SemanticNetwork):
             }
             return {e for c in e_is_member_of for e in predecessor_path(c)}
 
-        d1 = {e: 1.0 for e in get_members_with_hierarchy(1)}
-        d2 = {e: 1.0 for e in get_members_with_hierarchy(2)}
+        def get_prob(entity: str, num_entity: typing.Literal[1, 2]) -> float:
+            matching = 0
+            for decl in assoc_decl:
+                for decl1 in self.query_local(
+                    user=user,
+                    e1=(
+                        decl.relation.entity1
+                        if num_entity == 1
+                        else decl.relation.entity2
+                    ),
+                ):
+                    if entity == decl1.relation.entity2:
+                        matching += 1
+            return matching / n
+
+        d1 = {e: get_prob(e, 1) for e in get_members_with_hierarchy(1)}
+        d2 = {e: get_prob(e, 2) for e in get_members_with_hierarchy(2)}
 
         self.assoc_stats[(assoc, user)] = (d1, d2)
 
