@@ -18,7 +18,7 @@ class MySN(SemanticNetwork):
         SemanticNetwork.__init__(self)
         self.query_result: list[Declaration] = []
         self.assoc_stats: dict[
-            tuple[str, str], tuple[dict[str, float], dict[str, float]]
+            tuple[str, Union[str, None]], tuple[dict[str, float], dict[str, float]]
         ] = {}
 
     def query_local(
@@ -84,7 +84,9 @@ class MySN(SemanticNetwork):
                 if res := predecessor_path(d.relation.entity2):
                     return res + [c]
 
-        def get_members_with_hierarchy(num_entity: typing.Literal[1, 2]) -> dict[str, float]:
+        def get_members_with_hierarchy(
+            num_entity: typing.Literal[1, 2]
+        ) -> dict[str, float]:
             entities = (
                 {d.relation.entity1 for d in assoc_decl}
                 if num_entity == 1
@@ -97,13 +99,16 @@ class MySN(SemanticNetwork):
                 d.relation.entity2 for ld in e_member_decl for d in ld
             }
 
-            return {
-                p: get_prob(c, num_entity) / n
-                for c in e_is_member_of
-                for p in predecessor_path(c)
-            }
+            ret: dict = {}
+            for c in e_is_member_of:
+                for p in predecessor_path(c):
+                    if p not in ret:
+                        ret[p] = 0
+                    ret[p] = ret[p] + get_matches(c, num_entity)
 
-        def get_prob(entity: str, num_entity: typing.Literal[1, 2]) -> float:
+            return {key: value / n for key, value in ret.items()}
+
+        def get_matches(entity: str, num_entity: typing.Literal[1, 2]) -> float:
             matching = 0
             for decl in assoc_decl:
                 for decl1 in self.query_local(
