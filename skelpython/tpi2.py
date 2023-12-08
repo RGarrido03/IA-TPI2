@@ -144,12 +144,40 @@ class MySN(SemanticNetwork):
 class MyCS(ConstraintSearch):
     def __init__(self, domains, constraints):
         ConstraintSearch.__init__(self, domains, constraints)
-        # ADD CODE HERE IF NEEDED
-        pass
 
-    def search_all(self, domains=None, xpto=None):
-        # If needed, you can use argument 'xpto'
-        # to pass information to the function
-        #
-        # IMPLEMENTAR AQUI
-        pass
+    def search_all(self, domains=None):
+        if domains is None:
+            domains = self.domains
+
+        if any([lv == [] for lv in domains.values()]):
+            return None
+
+        if all([len(lv) == 1 for lv in list(domains.values())]):
+            return [{v: lv[0] for (v, lv) in domains.items()}]
+
+        for var in domains.keys():
+            if len(domains[var]) > 1:
+                solutions = set()
+                for val in domains[var]:
+                    newdomains = dict(domains)
+                    newdomains[var] = [val]
+
+                    newdomains = self.propagate_constraints(newdomains, var, val)
+                    solution = self.search_all(newdomains)
+                    if solution is not None:
+                        solutions += solution
+                return solutions
+        return None
+
+    def propagate_constraints(self, domains, var, val) -> dict | None:
+        for variable, domain in domains.items():
+            if variable == var:
+                continue
+            if (variable, var) in self.constraints.keys():
+                constraint = self.constraints[variable, var]
+                domains[variable] = [
+                    v for v in domain if constraint(variable, v, var, val)
+                ]
+                if not domains[variable]:
+                    return None
+        return domains
