@@ -84,7 +84,7 @@ class MySN(SemanticNetwork):
                 if res := predecessor_path(d.relation.entity2):
                     return res + [c]
 
-        def get_members_with_hierarchy(num_entity: typing.Literal[1, 2]) -> set:
+        def get_members_with_hierarchy(num_entity: typing.Literal[1, 2]) -> dict:
             entities = (
                 {d.relation.entity1 for d in assoc_decl}
                 if num_entity == 1
@@ -96,7 +96,15 @@ class MySN(SemanticNetwork):
             e_is_member_of: set[str] = {
                 d.relation.entity2 for ld in e_member_decl for d in ld
             }
-            return {e for c in e_is_member_of for e in predecessor_path(c)}
+
+            ret = {}
+            for c in e_is_member_of:
+                matches = get_prob(c, num_entity)
+                predecessors = predecessor_path(c)
+                for p in predecessors:
+                    ret[p] = matches / n
+
+            return ret
 
         def get_prob(entity: str, num_entity: typing.Literal[1, 2]) -> float:
             matching = 0
@@ -111,12 +119,12 @@ class MySN(SemanticNetwork):
                 ):
                     if entity == decl1.relation.entity2:
                         matching += 1
-            return matching / n
+            return matching
 
-        d1 = {e: get_prob(e, 1) for e in get_members_with_hierarchy(1)}
-        d2 = {e: get_prob(e, 2) for e in get_members_with_hierarchy(2)}
-
-        self.assoc_stats[(assoc, user)] = (d1, d2)
+        self.assoc_stats[(assoc, user)] = (
+            get_members_with_hierarchy(1),
+            get_members_with_hierarchy(2),
+        )
 
 
 class MyCS(ConstraintSearch):
