@@ -1,4 +1,5 @@
 # encoding: utf8
+import typing
 from typing import Type
 
 # YOUR NAME: Rúben Tavares Garrido
@@ -74,7 +75,6 @@ class MySN(SemanticNetwork):
     def update_assoc_stats(self, assoc: str, user: str = None) -> None:
         # TODO: Check if user is None
         # TODO: Get probability
-
         assoc_decl = self.query_local(user=user, rel=assoc)
 
         def predecessor_path(c: str) -> list:
@@ -85,27 +85,22 @@ class MySN(SemanticNetwork):
                 if res := predecessor_path(d.relation.entity2):
                     return res + [c]
 
-        # In the next variables, each one is a list of two elements.
-        # The first element is related to e1, the second one is related to e2.
-        entities: list[set[str]] = [
-            {d.relation.entity1 for d in assoc_decl},
-            {d.relation.entity2 for d in assoc_decl},
-        ]
-        entities_member_decl: list[list[list[Declaration]]] = [
-            [self.query_local(user=user, e1=e, rel="member") for e in entities[0]],
-            [self.query_local(user=user, e1=e, rel="member") for e in entities[1]],
-        ]
-        entities_member_of: list[set[str]] = [
-            {d.relation.entity2 for ld in entities_member_decl[0] for d in ld},
-            {d.relation.entity2 for ld in entities_member_decl[1] for d in ld},
-        ]
-        entities_member_of_with_hierarchy: list[set[str]] = [
-            {e for c in entities_member_of[0] for e in predecessor_path(c)},
-            {e for c in entities_member_of[1] for e in predecessor_path(c)},
-        ]
+        def get_members_with_hierarchy(num_entity: typing.Literal[1, 2]) -> set:
+            entities = (
+                {d.relation.entity1 for d in assoc_decl}
+                if num_entity == 1
+                else {d.relation.entity2 for d in assoc_decl}
+            )
+            e_member_decl = [
+                self.query_local(user=user, e1=e, rel="member") for e in entities
+            ]
+            e_is_member_of: set[str] = {
+                d.relation.entity2 for ld in e_member_decl for d in ld
+            }
+            return {e for c in e_is_member_of for e in predecessor_path(c)}
 
-        d1 = {e: 1.0 for e in entities_member_of_with_hierarchy[0]}
-        d2 = {e: 1.0 for e in entities_member_of_with_hierarchy[1]}
+        d1 = {e: 1.0 for e in get_members_with_hierarchy(1)}
+        d2 = {e: 1.0 for e in get_members_with_hierarchy(2)}
 
         self.assoc_stats[(assoc, user)] = (d1, d2)
 
