@@ -127,13 +127,13 @@ has_constraint(queens,(V1,V2),no_attack)
    domain(queens,V2,_),
    V1 \= V2.
 
-%:- search_all(queens,Solutions), write2ln(Solutions).
+:- search_all(queens,Solutions), write2ln(Solutions).
 
 %% 
 %% Map coloring
 %% 
 
-domain(mapa_a,V,[red,blue,green,purple])
+domain(mapa_a,V,[red,blue,green])
 :- member(V,[a,b,c,d,e]).
 
 has_constraint(mapa_a,(V1,V2),different_color)
@@ -147,7 +147,7 @@ has_constraint(mapa_a,(V1,V2),different_color)
 different_color(_,C1,_,C2)
 :- C1 \= C2.
  
-%:- search_all(mapa_a,Solutions), write2ln(Solutions).
+:- search_all(mapa_a,Solutions), write2ln(Solutions).
 
 %%
 %% TWO+TWO=FOUR
@@ -156,6 +156,8 @@ different_color(_,C1,_,C2)
 % variables and domains
 
 variables(twoplustwo,[t,w,o,f,u,r]).
+
+tuple_variables(twoplustwo,[orx1,wx1ux2,tx2of]).
 
 domain(twoplustwo,V,[0,1,2,3,4,5,6,7,8,9])
 :- variables(twoplustwo,LV), member(V,LV), V\=f.
@@ -194,7 +196,7 @@ domain(twoplustwo,tx2of,Domain)
                   2*T+X2=:=O+10*F ), Domain).
 
 cartesian_product(Prod0,Set,Prod)
-:- findall([H|T],( member(T,Prod0), member(H,Set) ),Prod).
+:- findall(P,( member(T,Prod0), member(X,Set), append(T,[X],P) ),Prod).
 
 
 % constraints
@@ -226,8 +228,6 @@ has_constraint(twoplustwo,(V1,V2),different_digit)
    member(V1,Variables), member(V2,Variables),
    V1 \= V2.
 
-tuple_variables(twoplustwo,[orx1,wx1ux2,tx2of]).
-
 has_constraint(twoplustwo,(orx1,o),tuple_constraint0).
 has_constraint(twoplustwo,(orx1,r),tuple_constraint1).
 has_constraint(twoplustwo,(orx1,x1),tuple_constraint2).
@@ -243,10 +243,18 @@ has_constraint(twoplustwo,(tx2of,o),tuple_constraint2).
 has_constraint(twoplustwo,(tx2of,f),tuple_constraint3).
 
 has_constraint(twoplustwo,(V,TV),Constraint)
-:- tuple_variables(TupleVars),
+:- variables(twoplustwo,Vars),
+   member(V,[x1,x2|Vars]),
+   tuple_variables(twoplustwo,TupleVars),
    member(TV,TupleVars),
    has_constraint(twoplustwo,(TV,V),Constraint).
 
-%:- search_all(twoplustwo,Solutions), write2ln(Solutions).
+:- search_all(twoplustwo,Solutions), 
+   variables(twoplustwo,Vars),
+   findall(S,( member(Full,Solutions),
+               findall((Var,Val), ( member(Var,Vars), member((Var,Val),Full)), S),
+               writeln(S) ),List),
+   length(List,Len),
+   writeln('Number of solutions':Len).
 
 
