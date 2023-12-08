@@ -1,6 +1,9 @@
 
 :- [tpi2].
 
+write2ln(X)
+:- writeln(X), nl.
+
 %% ------------------------------------------------------------
 %% Semantic network
 %% ------------------------------------------------------------
@@ -25,43 +28,74 @@
 %% query_local
 
 :- query_local(_,_,_,_,Declarations),
-   writeln('all declarations':Declarations).
+   write2ln('all declarations':Declarations).
 :- query_local(_,_,subtype,man,Declarations),
-   writeln(subtype-man:Declarations).
+   write2ln(subtype-man:Declarations).
 :- query_local(_,_,member,man,Declarations),
-   writeln(member-man:Declarations).
+   write2ln(member-man:Declarations).
 
-%% query_local
+%% query
 
 :- query('Socrates',likes,Declarations),
-   writeln('Socrates'-likes:Declarations).
+   write2ln('Socrates'-likes:Declarations).
 
 %% update_assoc_stats
 
 :- update_assoc_stats(teacher,descartes),
    assoc_stats(teacher,descartes,Stats1,Stats2),
-   writeln((teacher,descartes):(Stats1,Stats2)).
+   write2ln((teacher,descartes):(Stats1,Stats2)).
 
 :- declare(descartes,member('Philosophy',discipline)).
+
 :- update_assoc_stats(teacher,descartes),
    assoc_stats(teacher,descartes,Stats1,Stats2),
-   writeln((teacher,descartes):(Stats1,Stats2)).
+   write2ln((teacher,descartes):(Stats1,Stats2)).
 
 :- declare(descartes,subtype(man,human)).
+
 :- update_assoc_stats(teacher,descartes),
    assoc_stats(teacher,descartes,Stats1,Stats2),
-   writeln((teacher,descartes):(Stats1,Stats2)).
-
-%% query
+   write2ln((teacher,descartes):(Stats1,Stats2)).
 
 :- declare(descartes,member('Elvira',woman)).
 :- declare(descartes,association('Elvira',teacher,'Philosophy')).
+
+:- update_assoc_stats(teacher,descartes),
+   assoc_stats(teacher,descartes,Stats1,Stats2),
+   write2ln((teacher,descartes):(Stats1,Stats2)).
+
+%% query
+
 :- declare(descartes,subtype(woman,human)).
+
 :- query('Elvira',breastfeed,Declarations),
-   writeln(Declarations).
+   write2ln(Declarations).
+
+%% update_assoc_stats
+
+:- update_assoc_stats(teacher,descartes),
+   assoc_stats(teacher,descartes,Stats1,Stats2),
+   write2ln((teacher,descartes):(Stats1,Stats2)).
+
+%% query_local
 
 :- declare(darwin,assocOne('Mary',hasMother,'Elvira')).
 :- declare(darwin,assocOne('Elvira',hasMother,'Eva')).
+
+:- query_local(_,_,hasMother,_,Declarations),
+   write2ln('hasMother':Declarations).
+
+%% update_assoc_stats
+
+:- update_assoc_stats(hasMother,darwin),
+   assoc_stats(hasMother,darwin,Stats1,Stats2),
+   write2ln((hasMother,darwin):(Stats1,Stats2)).
+
+:- declare(darwin,assocOne('human',hasMother,'woman')).
+
+:- update_assoc_stats(hasMother,darwin),
+   assoc_stats(hasMother,darwin,Stats1,Stats2),
+   write2ln((hasMother,darwin):(Stats1,Stats2)).
 
 
 %% ------------------------------------------------------------
@@ -93,7 +127,7 @@ has_constraint(queens,(V1,V2),no_attack)
    domain(queens,V2,_),
    V1 \= V2.
 
-:- search_all(queens,Solutions), writeln(Solutions).
+%:- search_all(queens,Solutions), write2ln(Solutions).
 
 %% 
 %% Map coloring
@@ -113,7 +147,7 @@ has_constraint(mapa_a,(V1,V2),different_color)
 different_color(_,C1,_,C2)
 :- C1 \= C2.
  
-:- search_all(mapa_a,Solutions), writeln(Solutions).
+%:- search_all(mapa_a,Solutions), write2ln(Solutions).
 
 %%
 %% TWO+TWO=FOUR
@@ -213,5 +247,6 @@ has_constraint(twoplustwo,(V,TV),Constraint)
    member(TV,TupleVars),
    has_constraint(twoplustwo,(TV,V),Constraint).
 
-:- search_all(twoplustwo,Solutions), writeln(Solutions).
+%:- search_all(twoplustwo,Solutions), write2ln(Solutions).
+
 
