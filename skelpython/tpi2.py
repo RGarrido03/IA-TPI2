@@ -10,15 +10,12 @@ from typing import Type
 
 from semantic_network import *
 from constraintsearch import *
-from skelpython.semantic_network import Association
 
 
 class MySN(SemanticNetwork):
     def __init__(self):
         SemanticNetwork.__init__(self)
         self.query_result = []
-        # ADD CODE HERE IF NEEDED
-        pass
 
     def query_local(self, user=None, e1=None, rel=None, e2=None):
         def get_decl(
