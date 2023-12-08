@@ -18,14 +18,14 @@ class MySN(SemanticNetwork):
         SemanticNetwork.__init__(self)
         self.query_result: list[Declaration] = []
         self.assoc_stats: dict[
-            tuple[str, Union[str, None]], tuple[dict[str, float], dict[str, float]]
+            tuple[str, str | None], tuple[dict[str, float], dict[str, float]]
         ] = {}
 
     def query_local(
         self, user: str = None, e1: str = None, rel: str = None, e2: str = None
     ) -> list[Declaration]:
         def get_decl(
-            user_iter: str, e1_iter: str, rel_iter: str, e2_iter: Union[str, set]
+            user_iter: str, e1_iter: str, rel_iter: str, e2_iter: str | set
         ) -> list[Declaration]:
             if rel_iter == "member":
                 return [Declaration(user_iter, Member(e1_iter, e2_iter))]

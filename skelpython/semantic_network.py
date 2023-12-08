@@ -59,7 +59,7 @@ class Declaration:
 #    User data dictionary: { (e11,rel1):e12, (e21,rel2):e22, .... }
 class SemanticNetwork:
     def __init__(self):
-        self.declarations: dict[str, dict[tuple[str, str], Union[str, set]]] = {}
+        self.declarations: dict[str, dict[tuple[str, str], str | set]] = {}
 
     def __str__(self):
         return str(self.declarations)
