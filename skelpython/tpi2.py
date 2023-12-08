@@ -15,9 +15,11 @@ from constraintsearch import *
 class MySN(SemanticNetwork):
     def __init__(self):
         SemanticNetwork.__init__(self)
-        self.query_result = []
+        self.query_result: list[Declaration] = []
 
-    def query_local(self, user=None, e1=None, rel=None, e2=None) -> list[Declaration]:
+    def query_local(
+        self, user: str = None, e1: str = None, rel: str = None, e2: str = None
+    ) -> list[Declaration]:
         def get_decl(
             user_iter: str, e1_iter: str, rel_iter: str, e2_iter: Union[str, set]
         ) -> list[Declaration]:
@@ -50,7 +52,7 @@ class MySN(SemanticNetwork):
         ]
         return self.query_result
 
-    def query(self, entity, rel=None) -> list:
+    def query(self, entity: str, rel: str = None) -> list[Declaration]:
         decl_local = self.query_local(e1=entity, rel=rel) + self.query_local(
             e2=entity, rel=rel
         )
@@ -66,7 +68,7 @@ class MySN(SemanticNetwork):
         self.query_result = decl
         return self.query_result
 
-    def update_assoc_stats(self, assoc, user=None):
+    def update_assoc_stats(self, assoc: str, user: str = None) -> None:
         # IMPLEMENT HERE
         pass
 
