@@ -5,8 +5,7 @@ from typing import Callable, Literal
 # YOUR NUMBER: 107927
 
 # COLLEAGUES WITH WHOM YOU DISCUSSED THIS ASSIGNMENT (names, numbers):
-# - ...
-# - ...
+# - Diana Miranda (107457)
 
 from semantic_network import *
 from constraintsearch import *
