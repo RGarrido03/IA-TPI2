@@ -257,4 +257,3 @@ has_constraint(twoplustwo,(V,TV),Constraint)
    length(List,Len),
    writeln('Number of solutions':Len).
 
-
