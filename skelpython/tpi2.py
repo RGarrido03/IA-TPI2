@@ -60,6 +60,12 @@ class MySN(SemanticNetwork):
             e2=entity, rel=rel
         )
 
+        decl_local = [
+            d
+            for d in decl_local
+            if not (d.relation.name == "member" or d.relation.name == "subtype")
+        ]
+
         pred_direct = self.query_local(e1=entity, rel="member") + self.query_local(
             e1=entity, rel="subtype"
         )
