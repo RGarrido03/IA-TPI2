@@ -1,6 +1,5 @@
 # encoding: utf8
-import typing
-from typing import Type
+from typing import Callable, Literal
 
 # YOUR NAME: Rúben Tavares Garrido
 # YOUR NUMBER: 107927
@@ -85,9 +84,7 @@ class MySN(SemanticNetwork):
                 if res := predecessor_path(d.relation.entity2):
                     return res + [c]
 
-        def get_members_with_hierarchy(
-            num_entity: typing.Literal[1, 2]
-        ) -> dict[str, float]:
+        def get_members_with_hierarchy(num_entity: Literal[1, 2]) -> dict[str, float]:
             entities = (
                 {d.relation.entity1 for d in assoc_decl}
                 if num_entity == 1
@@ -120,7 +117,7 @@ class MySN(SemanticNetwork):
 
             return {key: value / divisor for key, value in ret.items()}
 
-        def get_matches(entity: str, num_entity: typing.Literal[1, 2]) -> float:
+        def get_matches(entity: str, num_entity: Literal[1, 2]) -> float:
             matching = 0
             for decl in assoc_decl:
                 for decl1 in self.query_local(
@@ -142,12 +139,16 @@ class MySN(SemanticNetwork):
 
 
 class MyCS(ConstraintSearch):
-    def __init__(self, domains, constraints):
+    def __init__(
+        self,
+        domains: dict[str, list[int]],
+        constraints: dict[tuple[str, str], Callable[[int, int, int, int], bool]],
+    ):
         ConstraintSearch.__init__(self, domains, constraints)
 
-    def search_all(self, domains=None):
+    def search_all(self, domains: dict[str, list[int]] = None) -> list[dict] | None:
         if domains is None:
-            domains = self.domains
+            domains: dict[str, list[int]] = self.domains
 
         if any([lv == [] for lv in domains.values()]):
             return None
@@ -157,27 +158,33 @@ class MyCS(ConstraintSearch):
 
         for var in domains.keys():
             if len(domains[var]) > 1:
-                solutions = set()
+                solutions: list[dict] = []
                 for val in domains[var]:
                     newdomains = dict(domains)
                     newdomains[var] = [val]
 
-                    newdomains = self.propagate_constraints(newdomains, var, val)
+                    newdomains = self.propagate_constraints(newdomains, var)
                     solution = self.search_all(newdomains)
-                    if solution is not None:
+                    if solution is not None and solution not in solutions:
                         solutions += solution
                 return solutions
         return None
 
-    def propagate_constraints(self, domains, var, val) -> dict | None:
-        for variable, domain in domains.items():
-            if variable == var:
-                continue
-            if (variable, var) in self.constraints.keys():
-                constraint = self.constraints[variable, var]
-                domains[variable] = [
-                    v for v in domain if constraint(variable, v, var, val)
-                ]
-                if not domains[variable]:
-                    return None
+    def propagate_constraints(
+        self, domains: dict[str, list[int]], var: str
+    ) -> dict[str, list[int]]:
+        def get_constraints(var_const: str) -> list:
+            return [(w1, w2) for (w1, w2) in self.constraints if w2 == var_const]
+
+        edges = get_constraints(var)
+        while edges:
+            (v1, v2) = edges.pop()
+            values = [
+                x1
+                for x1 in domains[v1]
+                if any(self.constraints[v1, v2](v1, x1, v2, x2) for x2 in domains[v2])
+            ]
+            if len(values) < len(domains[v1]):
+                domains[v1] = values
+                edges += get_constraints(v1)
         return domains
