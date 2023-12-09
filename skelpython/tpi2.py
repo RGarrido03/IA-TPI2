@@ -93,17 +93,23 @@ class MySN(SemanticNetwork):
             e_member_decl = [
                 self.query_local(user=user, e1=e, rel="member") for e in entities
             ]
-            k = n - sum(
-                [
-                    len(
-                        self.query_local(
-                            user=d.user, e1=d.relation.entity1, rel="member"
-                        )
+
+            k = sum(
+                len(
+                    self.query_local(
+                        user=user,
+                        e1=(
+                            d.relation.entity1
+                            if num_entity == 1
+                            else d.relation.entity2
+                        ),
                     )
-                    for d in assoc_decl
-                ]
+                )
+                == 0
+                for d in assoc_decl
             )
             divisor = n - k + (k ** (1 / 2))
+
             e_is_member_of: set[str] = {
                 d.relation.entity2 for ld in e_member_decl for d in ld
             }
