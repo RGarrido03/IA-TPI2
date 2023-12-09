@@ -96,16 +96,7 @@ class MySN(SemanticNetwork):
                 if res := predecessor_path(d.relation.entity2):
                     return res + [c]
 
-        def get_members_with_hierarchy(num_entity: Literal[1, 2]) -> dict[str, float]:
-            entities = (
-                {d.relation.entity1 for d in assoc_decl}
-                if num_entity == 1
-                else {d.relation.entity2 for d in assoc_decl}
-            )
-            e_member_decl = [
-                self.query_local(user=user, e1=e, rel="member") for e in entities
-            ]
-
+        def get_divisor(num_entity: Literal[1, 2]) -> float:
             k = sum(
                 len(
                     self.query_local(
@@ -120,8 +111,18 @@ class MySN(SemanticNetwork):
                 == 0
                 for d in assoc_decl
             )
-            divisor = n - k + (k ** (1 / 2))
+            return n - k + (k ** (1 / 2))
 
+        def get_members_with_hierarchy(num_entity: Literal[1, 2]) -> dict[str, float]:
+            entities = (
+                {d.relation.entity1 for d in assoc_decl}
+                if num_entity == 1
+                else {d.relation.entity2 for d in assoc_decl}
+            )
+
+            e_member_decl = [
+                self.query_local(user=user, e1=e, rel="member") for e in entities
+            ]
             e_is_member_of: set[str] = {
                 d.relation.entity2 for ld in e_member_decl for d in ld
             }
@@ -133,7 +134,7 @@ class MySN(SemanticNetwork):
                         ret[p] = 0
                     ret[p] = ret[p] + get_matches(c, num_entity)
 
-            return {key: value / divisor for key, value in ret.items()}
+            return {key: value / get_divisor(num_entity) for key, value in ret.items()}
 
         def get_matches(entity: str, num_entity: Literal[1, 2]) -> float:
             matching = 0
