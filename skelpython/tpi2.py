@@ -55,22 +55,21 @@ class MySN(SemanticNetwork):
         ]
         return self.query_result
 
-    def query(self, entity: str, rel: str = None) -> list:
-        decl = self.query_local(e1=entity, rel=rel) + self.query_local(
+    def query(self, entity: str, rel: str = None) -> list[Declaration]:
+        decl_local = self.query_local(e1=entity, rel=rel) + self.query_local(
             e2=entity, rel=rel
         )
-        decl_name = [d.relation.name for d in decl]
 
-        for pd in self.query_local(e1=entity, rel="member") + self.query_local(
+        pred_direct = self.query_local(e1=entity, rel="member") + self.query_local(
             e1=entity, rel="subtype"
-        ):
-            decl += [
-                p
-                for p in self.query(pd.relation.entity2, rel)
-                if p.relation.name not in decl_name
-            ]
+        )
 
-        return decl
+        decl = decl_local
+        for dp in pred_direct:
+            decl += self.query(dp.relation.entity2, rel)
+
+        self.query_result = decl
+        return self.query_result
 
     def update_assoc_stats(self, assoc: str, user: str = None) -> None:
         assoc_decl = self.query_local(user=user, rel=assoc)
