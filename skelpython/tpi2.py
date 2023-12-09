@@ -74,6 +74,13 @@ class MySN(SemanticNetwork):
 
     def update_assoc_stats(self, assoc: str, user: str = None) -> None:
         assoc_decl = self.query_local(user=user, rel=assoc)
+        assoc_decl = [
+            d
+            for d in assoc_decl
+            if not (
+                is_type_name(d.relation.entity1) and is_type_name(d.relation.entity2)
+            )
+        ]
         n = len(assoc_decl)
 
         def predecessor_path(c: str) -> list:
